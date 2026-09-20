@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<!-- saved from url=(0025)https://liendoanslay.com/ -->
+<html lang="vi"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <!-- Favicon mặc định của template Vite (một file SVG ở gốc public/) CHƯA BAO
+         GIỜ tồn tại trong repo này — tab trình duyệt vì thế trống suốt.
+         `src/publicHtml.test.ts` đòi href phải trỏ tới file đọc được thật trong
+         public/.
+
+         LỊCH SỬ BA LẦN ĐỔI, ĐỌC CẢ BA TRƯỚC KHI SỬA:
+         · plan 081 thay `logo-hth.jpg` (logo RIÊNG của Hỗn Thiên Lăng) bằng
+           `logo-slay.jpg` — logo liên đoàn DỰNG BẰNG CODE (`build-logo-thuy-mac.py`).
+         · 2026-08-14 chủ dự án BÁC bản dựng ấy sau khi xem ở cỡ thật; favicon và
+           og:image quay về `logo-hth.jpg` (huy hiệu một bang đại diện cả liên
+           đoàn — món nợ plan 081, để mở vì chưa có tranh liên đoàn nào).
+         · 2026-08-19 chủ dự án đưa `content.png` — TRANH VẼ TAY của cả liên đoàn
+           ("Liên đoàn SLAY", thư pháp mực, rồng, 天下無雙). Đây chính là tấm mà
+           món nợ 081 chờ. `logo-slay.jpg` nay LÀ tranh đó (thu về 512px), KHÔNG
+           còn là bản dựng bằng code. Món nợ ĐÓNG: favicon + og:image + bốn chỗ
+           trong app đều mang logo liên đoàn thật. -->
+    <link rel="icon" type="image/jpeg" href="https://liendoanslay.com/logo-slay.jpg">
+    <!-- ĐỪNG thêm lại hai tham số chặn phóng to của thẻ này: giới hạn tỉ lệ tối
+         đa, và khoá zoom hai ngón. Trang có bảng thưởng và bảng lịch cỡ chữ
+         10-13px đọc trên điện thoại; chặn phóng to là trượt WCAG 1.4.4 và người
+         dùng không có cách nào tự khắc phục. Gác bởi `src/publicHtml.test.ts` —
+         test đó cấm hai chuỗi ấy xuất hiện Ở BẤT KỲ ĐÂU trong file này, kể cả
+         trong chính comment này, nên ở đây phải gọi tên chúng bằng lời. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- ═══ FONT: CẮT MỘT CHẶNG, MỞ SỚM HAI KẾT NỐI (sổ soi 20/08, mục G7) ═══
+         Chuỗi phụ thuộc TRƯỚC đợt này, đo trên bản đã build:
+
+           index.html → CSS (chặn dựng hình) → parse xong mới phát hiện @import
+           → fonts.googleapis.com (DNS+TCP+TLS MỚI) → fonts.gstatic.com
+           (DNS+TCP+TLS MỚI) → woff2
+
+         Ba chặng NỐI TIẾP, không chặng nào bắt đầu trước khi chặng trước xong.
+         Với RTT ~100ms trên 4G, hai kết nối lạnh nối tiếp là ~600–900ms.
+
+         Hai việc ở đây cắt hai chặng đầu:
+           · `preconnect` mở sẵn DNS+TCP+TLS tới cả hai host NGAY khi HTML được
+             đọc, thay vì đợi CSS parse xong;
+           · `<link rel="stylesheet">` thay cho `@import` trong `index.css` bỏ
+             hẳn chặng "phải parse CSS mới biết cần gì".
+
+         `crossorigin` trên preconnect tới `gstatic` là BẮT BUỘC: tệp font tải
+         theo chế độ CORS, và một kết nối đã mở KHÔNG-CORS không dùng lại được
+         cho nó — thiếu thuộc tính này thì preconnect vừa vô dụng vừa tốn một
+         kết nối thừa.
+
+         VÌ SAO KHÔNG `preload` LUÔN TỆP WOFF2: URL của tệp nằm TRONG stylesheet
+         của Google và đổi theo lần Google cập nhật bộ chữ. Ghim nó vào đây là
+         hẹn một ngày `preload` trỏ vào 404 — và trình duyệt vẫn tải font thật ở
+         một request khác, tức trả tiền hai lần.
+
+         Font thư pháp (`/fonts/hl-thuphap.woff2`) thì NGƯỢC LẠI: nó là tệp của
+         chính repo, đường dẫn cố định, và nó tô tiêu đề hero — đúng thứ gây
+         nhảy chữ khi swap. Cái đó preload được. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+    <link rel="stylesheet" href="./Liên Đoàn SLAY_files/css2">
+    <link rel="preload" as="font" type="font/woff2" href="https://liendoanslay.com/fonts/hl-thuphap.woff2" crossorigin="">
+    <!-- Tiêu đề trước khi React chạy. `main.tsx` ghi đè theo route ngay sau đó,
+         nhưng bot tìm kiếm và tab đang tải đọc đúng dòng này. -->
+    <title>Liên Đoàn SLAY</title>
+    <!-- ═══ META CHIA SẺ ═══
+         Bang phân phối link chủ yếu qua Discord, và Discord dựng thẻ xem trước từ
+         `og:*`. Không có khối này thì link dán vào Discord chỉ ra một dòng chữ
+         trơn — mất toàn bộ giá trị tuyển quân của mỗi lần chia sẻ.
+
+         MỘT thẻ cho CẢ SITE, cố ý. `vercel.json` rewrite mọi path về đúng file
+         này, và app là SPA nên bot (không chạy JS) chỉ đọc được HTML tĩnh. Muốn
+         mỗi hub bang có thẻ riêng thì phải prerender — việc khác, plan khác.
+
+         TÊN ĐỔI SANG "LIÊN ĐOÀN SLAY" Ở PLAN 079: liên đoàn nay có BỐN bang và
+         bốn cái tên không nhét vừa một dòng tiêu đề. Lý do đầy đủ (kể cả vì sao
+         lần trước chủ dự án BÁC chính cái tên này) ghi ở `SITE_NAME` trong
+         `src/lib/factions.ts` — sửa ở đây thì sửa cả ở đó.
+
+         Ảnh dùng logo vuông sẵn có: Discord dựng được thẻ nhỏ ngay. Ảnh ngang
+         1200x630 cho thẻ lớn cần chủ dự án duyệt — xem plan 050 mục
+         "Deliberately NOT doing". -->
+    <meta name="description" content="Liên Đoàn SLAY — bốn bang Nghịch Thủy Hàn: Hỗn Thiên Lăng, Phong Hỏa Luân, Càn Khôn Quyển, Hỏa Tiêm Thương. Thưởng rõ ràng, event mỗi tuần.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Liên Đoàn SLAY">
+    <meta property="og:url" content="https://liendoanslay.com/">
+    <meta property="og:title" content="Liên Đoàn SLAY">
+    <meta property="og:description" content="Liên Đoàn SLAY — bốn bang Nghịch Thủy Hàn: Hỗn Thiên Lăng, Phong Hỏa Luân, Càn Khôn Quyển, Hỏa Tiêm Thương. Thưởng rõ ràng, event mỗi tuần.">
+    <!-- Ảnh hiện trong ô xem trước khi ai dán link web vào Discord. Trước đây
+         đây là chỗ "logo một bang làm logo cả liên đoàn" gây hậu quả rõ nhất: ô
+         preview nói `og:site_name` = "Liên Đoàn SLAY" mà ảnh lại là huy hiệu Hỗn
+         Thiên Lăng, trong khi link được dán vào kênh của cả bốn bang.
+
+         2026-08-19 ĐÓNG: `logo-slay.jpg` nay là tranh vẽ tay của cả liên đoàn
+         (xem khối favicon trên), nên favicon và og:image DÙNG CÙNG MỘT TẤM và
+         tấm đó đại diện đúng liên đoàn. Ảnh vuông → thẻ `summary` nhỏ; muốn thẻ
+         lớn thì cần ảnh ngang 1200x630 (plan 050 "Deliberately NOT doing"). -->
+    <meta property="og:image" content="https://liendoanslay.com/logo-slay.jpg">
+    <meta name="twitter:card" content="summary">
+
+    <!-- ═══ CHẾ ĐỘ TỐI PHẢI ĐƯỢC QUYẾT ĐỊNH TRƯỚC LẦN VẼ ĐẦU (plan 132) ═══════
+         Đây là script ĐỒNG BỘ, KHÔNG `defer`, KHÔNG `type="module"`, và nằm
+         TRONG `<head>` — cả ba điều đó đều bắt buộc, vì cùng một lý do.
+
+         `main.tsx` là module: trình duyệt hoãn nó tới sau khi dựng xong DOM.
+         Đặt việc gắn `data-theme` vào React nghĩa là trang được vẽ MỘT KHUNG
+         HÌNH bằng bảng màu sáng rồi mới lật sang tối — một cú loé trắng toàn
+         màn, đúng vào thứ mà người bật chế độ tối đang cố tránh, và nó loé ở
+         MỌI lần tải trang chứ không phải lần đầu.
+
+         Bốn dòng dưới đây chép lại `giaiCheDo()` của `src/lib/theme.ts`, và đó
+         là một bản sao CÓ CHỦ Ý — nó không thể `import` gì (import là module,
+         module là hoãn). `src/theme.test.ts` gác việc hai bản không được lệch:
+         nó đọc chính file HTML này và đòi khoá, ba giá trị hợp lệ, cùng tên
+         thuộc tính phải khớp module.
+
+         `try` bọc kín: `localStorage` ném ngay ở lượt ĐỌC khi trình duyệt chặn
+         site data, và một cú ném trong `<head>` thì chặn luôn phần còn lại của
+         trang. Ném thì rơi về đúng nhánh "theo hệ điều hành". -->
+    <script>
+      (function () {
+        try {
+          var v = null;
+          try { v = localStorage.getItem('slay_theme'); } catch (e) {}
+          var toi = v === 'toi' || (v !== 'sang' &&
+            window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.setAttribute('data-theme', toi ? 'toi' : 'sang');
+          document.documentElement.style.colorScheme = toi ? 'dark' : 'light';
+        } catch (e) {}
+      })();
+    </script></head></html>
